@@ -71,12 +71,12 @@ export default function MuestraGirasolModal({
 
   const handleGuardar = () => {
     // Valida que todos los 23 campos estén completos
-    const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
+    // const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
     
-    if (!allFieldsValid) {
-      Alert.alert('Error', 'Todos los campos de datos son obligatorios');
-      return;
-    }
+    // if (!allFieldsValid) {
+    //   Alert.alert('Error', 'Todos los campos de datos son obligatorios');
+    //   return;
+    // }
     
     const datosCompletos = { ...data, coordenada };
     
@@ -150,7 +150,7 @@ export default function MuestraGirasolModal({
       '10': 'R8 (envés capítulo amarillo)',
       '11': 'R9 (brácteas amarillo/marrón)',
     };
-    return estados[estadoFenologico] || 'Trigo';
+    return estados[estadoFenologico] || 'Girasol';
   };
 
   // Renderiza los 6 inputs
@@ -175,7 +175,8 @@ export default function MuestraGirasolModal({
     });
   };
 
-  const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+  //const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+  const isSaveDisabled = false; //comentar esto y descomentar arriba para habilitar la obligatoriedad
 
   return (
     <Modal

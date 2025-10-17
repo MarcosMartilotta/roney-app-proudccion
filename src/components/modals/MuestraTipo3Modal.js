@@ -127,13 +127,14 @@ export default function MuestraTipo3Modal({
   }, [esEdicion]);
 
   // ✅ Validación de campos memoizada (12 datos + coordenada)
-  const camposValidos = useMemo(() => {
-    return dato_1.trim() && dato_2.trim() && dato_3.trim() && dato_4.trim() &&
-           dato_5.trim() && dato_6.trim() && dato_7.trim() && dato_8.trim() &&
-           dato_9.trim() && dato_10.trim() && dato_11.trim() && dato_12.trim() &&
-           coordenada.trim();
-  }, [dato_1, dato_2, dato_3, dato_4, dato_5, dato_6, dato_7, dato_8, dato_9, dato_10, dato_11, dato_12, coordenada]);
+  // const camposValidos = useMemo(() => {
+  //   return dato_1.trim() && dato_2.trim() && dato_3.trim() && dato_4.trim() &&
+  //          dato_5.trim() && dato_6.trim() && dato_7.trim() && dato_8.trim() &&
+  //          dato_9.trim() && dato_10.trim() && dato_11.trim() && dato_12.trim() &&
+  //          coordenada.trim();
+  // }, [dato_1, dato_2, dato_3, dato_4, dato_5, dato_6, dato_7, dato_8, dato_9, dato_10, dato_11, dato_12, coordenada]);
 
+  const camposValidos = true;
   // ✅ Guardar memoizado
   const handleGuardar = useCallback(() => {
     if (!camposValidos) {

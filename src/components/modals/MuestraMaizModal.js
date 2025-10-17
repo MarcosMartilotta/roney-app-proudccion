@@ -73,11 +73,15 @@ export default function MuestraMaizModal({
   };
 
   const handleGuardar = () => {
-    // Validar que todos los 23 campos estén completos
-    const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
+    // Validación específica para dato_3 y dato_4
+    const d3 = parseFloat(data.dato_3);
+    const d4 = parseFloat(data.dato_4);
     
-    if (!allFieldsValid) {
-      Alert.alert('Error', 'Todos los campos de datos son obligatorios');
+    if (!data.dato_3 || !data.dato_4 || d3 === 0 || d4 === 0 || isNaN(d3) || isNaN(d4)) {
+      Alert.alert(
+        'Error', 
+        'Los campos "' + LABELS[2] + '" y "' + LABELS[3] + '" son obligatorios y deben ser distintos de 0'
+      );
       return;
     }
     
@@ -176,7 +180,12 @@ export default function MuestraMaizModal({
     });
   };
 
-  const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+  // const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+ // const isSaveDisabled = false; //comentar esto y descomentar arriba para habilitar la obligatoriedad
+
+ const d3 = parseFloat(data.dato_3) || 0;
+ const d4 = parseFloat(data.dato_4) || 0;
+ const isSaveDisabled = d3 === 0 || d4 === 0;
 
   return (
     <Modal

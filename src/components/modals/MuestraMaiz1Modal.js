@@ -70,12 +70,12 @@ export default function MuestraMaizModal1({
 
   const handleGuardar = () => {
     // Validar que todos los 23 campos estén completos
-    const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
+    // const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
     
-    if (!allFieldsValid) {
-      Alert.alert('Error', 'Todos los campos de datos son obligatorios');
-      return;
-    }
+    // if (!allFieldsValid) {
+    //   Alert.alert('Error', 'Todos los campos de datos son obligatorios');
+    //   return;
+    // }
     
     // Crear objeto completo con todos los datos
     const datosCompletos = { ...data, coordenada };
@@ -172,8 +172,8 @@ export default function MuestraMaizModal1({
     });
   };
 
-  const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
-
+  //const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+  const isSaveDisabled = false;
   return (
     <Modal
       visible={visible}

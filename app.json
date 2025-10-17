@@ -20,11 +20,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff",
-        "userInterfaceStyle":"light",
-        "versionCode": 2 
+        "userInterfaceStyle": "light",
+        "versionCode": 2
       },
       "package": "com.marcosmartilotta.dev.roneyproduccion",
-      "versionCode": 1
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"

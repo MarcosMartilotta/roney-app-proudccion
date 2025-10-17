@@ -88,18 +88,42 @@ export default function MuestraTrigoModal({
   };
 
   const handleGuardar = () => {
-    // Valida que todos los 23 campos estén completos
-    const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
+    const d1 = parseFloat(data.dato_1) || 0;
+    const d2 = parseFloat(data.dato_2) || 0;
+    const d3 = parseFloat(data.dato_3) || 0;
     
-    if (!allFieldsValid) {
-      Alert.alert('Error', 'Todos los campos de datos son obligatorios');
+    // Validar que al menos uno de los tres primeros datos tenga valor
+    const totenD = d1 + d2 + d3;
+    if (totenD === 0) {
+      Alert.alert(
+        'Error', 
+        'Al menos uno de los campos "' + LABELS[0] + '", "' + LABELS[1] + '" o "' + LABELS[2] + '" debe tener un valor mayor a 0'
+      );
       return;
     }
     
-    // Crea objeto completo con todos los datos
-    const datosCompletos = { ...data, coordenada };
+    // Validar denominador (suma de campos pares desde d5 hasta d23)
+    const denominador = 
+      (parseFloat(data.dato_5) || 0) +
+      (parseFloat(data.dato_7) || 0) +
+      (parseFloat(data.dato_9) || 0) +
+      (parseFloat(data.dato_11) || 0) +
+      (parseFloat(data.dato_13) || 0) +
+      (parseFloat(data.dato_15) || 0) +
+      (parseFloat(data.dato_17) || 0) +
+      (parseFloat(data.dato_19) || 0) +
+      (parseFloat(data.dato_21) || 0) +
+      (parseFloat(data.dato_23) || 0);
     
-    // Llama a onGuardar pasando el objeto completo
+    if (denominador === 0) {
+      Alert.alert(
+        'Error', 
+        'Al menos uno de los campos de "Total de granos" (datos 5, 7, 9, 11, 13, 15, 17, 19, 21, 23) debe tener un valor mayor a 0'
+      );
+      return;
+    }
+    
+    const datosCompletos = { ...data, coordenada };
     onGuardar(datosCompletos);
   };
 
@@ -187,7 +211,24 @@ export default function MuestraTrigoModal({
     });
   };
 
-  const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+  // const isSaveDisabled = !DATOS_FIELDS.every(key => data[key].trim());
+ // const isSaveDisabled = false;
+
+ const totenD = (parseFloat(data.dato_1) || 0) + (parseFloat(data.dato_2) || 0) + (parseFloat(data.dato_3) || 0);
+
+ const denominador = 
+   (parseFloat(data.dato_5) || 0) +
+   (parseFloat(data.dato_7) || 0) +
+   (parseFloat(data.dato_9) || 0) +
+   (parseFloat(data.dato_11) || 0) +
+   (parseFloat(data.dato_13) || 0) +
+   (parseFloat(data.dato_15) || 0) +
+   (parseFloat(data.dato_17) || 0) +
+   (parseFloat(data.dato_19) || 0) +
+   (parseFloat(data.dato_21) || 0) +
+   (parseFloat(data.dato_23) || 0);
+ 
+ const isSaveDisabled = totenD === 0 || denominador === 0;
 
   return (
     <Modal

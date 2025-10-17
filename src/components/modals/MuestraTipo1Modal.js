@@ -111,10 +111,11 @@ export default function MuestraTipo1Modal({
   }, [esEdicion]);
 
   // ✅ Validación de campos memoizada
-  const camposValidos = useMemo(() => {
-    return dato_1.trim() && dato_2.trim() && dato_3.trim() && dato_4.trim();
-  }, [dato_1, dato_2, dato_3, dato_4]);
-
+  // const camposValidos = useMemo(() => {
+  //   return dato_1.trim() && dato_2.trim() && dato_3.trim() && dato_4.trim();
+  // }, [dato_1, dato_2, dato_3, dato_4]);
+  const camposValidos = true;
+  
   // ✅ Guardar memoizado
   const handleGuardar = useCallback(() => {
     if (!camposValidos) {

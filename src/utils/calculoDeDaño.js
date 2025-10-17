@@ -841,7 +841,7 @@ function calcularDañoMaizReproductivo(datos, fenologicoNum) {
     
     const cprB = 100 - danA;
 
-    const danC = (d5 / (d3*d4*5)) * 100;
+    const danC = (d3 !== 0 && d4 !== 0) ? (d5 / (d3*d4*5)) * 100 : 0;
 
     const danE = (danC * cprB) / 100;
 

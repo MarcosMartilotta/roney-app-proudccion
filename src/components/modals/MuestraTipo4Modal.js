@@ -135,9 +135,10 @@ export default function MuestraTipo4Modal({
   }, [esEdicion]);
 
   // ✅ Validación de campos memoizada
-  const camposValidos = useMemo(() => {
-    return DATOS_FIELDS.every(key => data[key]?.trim());
-  }, [data]);
+  // const camposValidos = useMemo(() => {
+  //   return DATOS_FIELDS.every(key => data[key]?.trim());
+  // }, [data]);
+  const camposValidos = true;
 
   // ✅ Guardar memoizado
   const handleGuardar = useCallback(() => {
