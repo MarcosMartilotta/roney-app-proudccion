@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import VerMuestraModal from './VerMuestraModal';
+import { parseDecimalInput, formatDecimalDisplay, validateDecimalInput } from '../../utils/numberUtils';
 
 export default function EditarLoteModal({ 
   visible, 
@@ -47,8 +48,9 @@ export default function EditarLoteModal({
   useEffect(() => {
     if (visible && lote) {
       setNombreLote(lote.nombreLote);
-      setHectareas(lote.hectareas.toString());
-      setDañoPactado(lote.dañoPactado ? lote.dañoPactado.toString() : '');
+      // Convertir número a string con coma para el input
+      setHectareas(formatDecimalDisplay(lote.hectareas, 2));
+      setDañoPactado(lote.dañoPactado ? formatDecimalDisplay(lote.dañoPactado, 2) : '');
       cargarMuestrasDelLote();
     }
   }, [visible, lote]);
@@ -82,15 +84,28 @@ export default function EditarLoteModal({
     }
   }, [lote, operacionId]);
 
-  // ✅ Actualizar con validación de montaje
+  // ✅ Manejar cambio de hectáreas con validación
+  const handleHectareasChange = useCallback((text) => {
+    const validated = validateDecimalInput(text);
+    setHectareas(validated);
+  }, []);
+
+  // ✅ Manejar cambio de daño pactado con validación
+  const handleDañoPactadoChange = useCallback((text) => {
+    const validated = validateDecimalInput(text);
+    setDañoPactado(validated);
+  }, []);
+
+  // ✅ Actualizar con validación de montaje y parsing correcto
   const handleActualizar = useCallback(() => {
     if (!nombreLote.trim()) {
       Alert.alert('Error', 'El nombre del lote es obligatorio');
       return;
     }
 
-    const hectareasNumero = parseFloat(hectareas);
-    if (isNaN(hectareasNumero) || hectareasNumero <= 0) {
+    // Parsear con soporte para coma
+    const hectareasNumero = parseDecimalInput(hectareas);
+    if (hectareasNumero <= 0) {
       Alert.alert('Error', 'Las hectáreas deben ser un número mayor a 0');
       return;
     }
@@ -99,7 +114,7 @@ export default function EditarLoteModal({
       ...lote,
       nombreLote: nombreLote.trim(),
       hectareas: hectareasNumero,
-      dañoPactado: dañoPactado.trim() ? parseFloat(dañoPactado) : null,
+      dañoPactado: dañoPactado.trim() ? parseDecimalInput(dañoPactado) : null,
     };
 
     onActualizar(loteActualizado);
@@ -179,7 +194,12 @@ export default function EditarLoteModal({
     return lote?.tipoFenologicoLabel || lote?.tipoFenologico || '-';
   }, [lote]);
 
-  // ✅ Render item memoizado
+  // ✅ Daño real formateado
+  const dañoRealDisplay = useMemo(() => {
+    return formatDecimalDisplay(lote?.dañoReal || 0, 2);
+  }, [lote?.dañoReal]);
+
+  // ✅ Render item memoizado con formato
   const renderMuestra = useCallback(({ item }) => (
     <View style={styles.muestraItem}>
       <TouchableOpacity 
@@ -192,7 +212,7 @@ export default function EditarLoteModal({
           <Text style={styles.verDetalleText}>👁️ Ver</Text>
         </View>
         <Text style={styles.muestraDaño}>
-          Daño: {item.datos.porcentajeDaño || 0}%
+          Daño: {formatDecimalDisplay(item.datos.porcentajeDaño || 0, 2)}%
         </Text>
       </TouchableOpacity>
     </View>
@@ -249,10 +269,14 @@ export default function EditarLoteModal({
                   <TextInput
                     style={styles.input}
                     value={hectareas}
-                    onChangeText={setHectareas}
-                    keyboardType="numeric"
+                    onChangeText={handleHectareasChange}
+                    keyboardType="decimal-pad"
                     maxLength={10}
+                    placeholder="Ej: 10,5 o 10.5"
                   />
+                  <Text style={styles.helpTextSmall}>
+                    💡 Puedes usar coma (,) o punto (.) como separador decimal
+                  </Text>
                 </View>
 
                 <View style={styles.inputContainer}>
@@ -268,7 +292,7 @@ export default function EditarLoteModal({
                   <Text style={styles.label}>Daño Calculado</Text>
                   <View style={styles.calculatedContainer}>
                     <Text style={styles.calculatedValue}>
-                      {lote.dañoReal}%
+                      {dañoRealDisplay}%
                     </Text>
                   </View>
                 </View>
@@ -408,6 +432,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fafafa',
+    color: "#000"
   },
   readOnlyInput: {
     backgroundColor: '#f0f0f0',
@@ -421,6 +446,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#007bff',
     marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  helpTextSmall: {
+    fontSize: 11,
+    color: '#666',
+    marginTop: 4,
     fontStyle: 'italic',
   },
   calculatedContainer: {
@@ -456,7 +487,7 @@ const styles = StyleSheet.create({
   muestraNombre: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#000',
   },
   verDetalleText: {
     fontSize: 12,

@@ -17,6 +17,7 @@ import {
 } from '../utils/fenologicosConfig';
 import MuestraTrigoModal from '../components/modals/MuestraTrigoModal';
 import MuestraMaizModal from '../components/modals/MuestraMaizModal';
+import MuestraMaizModal1 from '../components/modals/MuestraMaiz1Modal';
 import MuestraGirasolModal from '../components/modals/MuestraGirasolModal';
 
 // ✅ Constantes fuera del componente
@@ -430,6 +431,9 @@ const recalcularDañoMuestrasActuales = useCallback(async (fenologicoParam = nul
 
   return (
     <View style={styles.container}>
+      <View style={styles.statsContainer}>
+         <Text style={styles.statsText}>Daño total: {promedioSeleccionadas} %</Text>
+      </View>
       <View style={styles.header}>
         <Picker
           selectedValue={fenologicoSeleccionado}
@@ -500,7 +504,6 @@ const recalcularDañoMuestrasActuales = useCallback(async (fenologicoParam = nul
           <Text style={styles.footerText}>
             Seleccionadas: {muestrasSeleccionadas.size}
           </Text>
-          <Text style={styles.footerText}>% {promedioSeleccionadas}</Text>
         </View>
         <View style={styles.footerButtons}>
           <TouchableOpacity 
@@ -554,9 +557,9 @@ function ModalesSegunTipo({ tipo, cultivo, visible, onCerrar, onGuardar, valores
     
     case 'maiz':
       switch (tipo) {
-        case '1': 
-        case '2': 
-          return <MuestraMaizModal {...props} tipoModal={tipo} />;
+        case '2': return <MuestraMaizModal {...props} />;
+        case '1': return <MuestraMaizModal1 {...props} />;
+
         default: return null;
       }
     
@@ -616,9 +619,13 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 140,
     color: '#000',
+    borderBlockColor: "#000",
+    borderColor: "#000"
+
   },
   pickerItem: {
-    color: '#000'
+    color: '#000',
+    backgroundColor: "#f8f9fa"
   },
   emptyText: {
     textAlign: 'center',
@@ -657,5 +664,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  statsContainer: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#F00',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  statsText: {
+    fontSize: 20,
+    color: '#000',
+    marginBottom: 4,
   },
 });

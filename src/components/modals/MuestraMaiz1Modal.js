@@ -16,39 +16,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { convertirADMS } from '../../utils/coordenadas';
 
 
-
 // --- CONFIGURACIÓN DE LOS 23 CAMPOS DE DATOS PARA TRIGO ---
-const DATOS_COUNT = 23;
+const DATOS_COUNT = 3;
 const DATOS_FIELDS = Array.from({ length: DATOS_COUNT }, (_, i) => `dato_${i + 1}`);
 
+// Etiquetas específicas para trigo (ajusta según tus necesidades)
 const LABELS = [
-  'Espigas perdidas',  // dato_1
-  'Espigas colgadas',  // dato_2
-  'Espigas restantes', // dato_3
-  'Granos perdidos 1',     // dato_4
-  'Granos totales 1',     // dato_5
-  'Granos perdidos 2',     // dato_6
-  'Granos totales 2',     // dato_7
-  'Granos perdidos 3',     // dato_8
-  'Granos totales 3',     // dato_9
-  'Granos perdidos 4',     // dato_10
-  'Granos totales 4',     // dato_11
-  'Granos perdidos 5',     // dato_12
-  'Granos totales 5',     // dato_13
-  'Granos perdidos 6',     // dato_14
-  'Granos totales 6',     // dato_15
-  'Granos perdidos 7',     // dato_16
-  'Granos totales 7',     // dato_17
-  'Granos perdidos 8',     // dato_18
-  'Granos totales 8',     // dato_19
-  'Granos perdidos 9',     // dato_20
-  'Granos totales 9',     // dato_21
-  'Granos perdidos 10',    // dato_22
-  'Granos totales 10'   // dato_23
+  'Polación perdida en D',  // dato_1
+  'Polación colgada en D',  // dato_2
+  'Polación restante en D', // dato_3
 ];
 // ------------------------------------------------
 
-export default function MuestraTrigoModal({ 
+export default function MuestraMaizModal1({ 
   visible, 
   onClose, 
   onGuardar, 
@@ -76,6 +56,7 @@ export default function MuestraTrigoModal({
     setCoordenada(valoresIniciales.coordenada || '');
   }, [valoresIniciales]);
 
+  // Obtiene GPS solo en creación
   useEffect(() => {
     if (!esEdicion && visible && !valoresIniciales.coordenada) {
       actualizarCoordenada();
@@ -88,7 +69,7 @@ export default function MuestraTrigoModal({
   };
 
   const handleGuardar = () => {
-    // Valida que todos los 23 campos estén completos
+    // Validar que todos los 23 campos estén completos
     const allFieldsValid = DATOS_FIELDS.every(key => data[key].trim());
     
     if (!allFieldsValid) {
@@ -96,10 +77,10 @@ export default function MuestraTrigoModal({
       return;
     }
     
-    // Crea objeto completo con todos los datos
+    // Crear objeto completo con todos los datos
     const datosCompletos = { ...data, coordenada };
     
-    // Llama a onGuardar pasando el objeto completo
+    // Llamar a onGuardar pasando el objeto completo
     onGuardar(datosCompletos);
   };
 
@@ -127,6 +108,7 @@ export default function MuestraTrigoModal({
       // const location = await Location.getCurrentPositionAsync({
       //   accuracy: Location.Accuracy.High,
       // });
+
       const location = await Promise.race([
         Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
@@ -136,12 +118,13 @@ export default function MuestraTrigoModal({
         )
       ]);
 
-      //const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      // const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
       const latitudDMS = convertirADMS(location.coords.latitude, true);
       const longitudDMS = convertirADMS(location.coords.longitude, false);
       const coords = `${latitudDMS}, ${longitudDMS}`;
+      
       setCoordenada(coords);
-      // Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+      //Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
       Alert.alert('Error', 'No se pudieron obtener las coordenadas GPS');
@@ -151,7 +134,9 @@ export default function MuestraTrigoModal({
     setLoadingGPS(false);
   };
 
+  // Obtener el nombre del estado fenológico para el título
   const getTituloEstado = () => {
+    // Mapear el valor del estado a su nombre legible
     const estados = {
       '1': 'Espigamiento (Z.50/59)',
       '2': 'Floración (Z.60/69)',
@@ -160,9 +145,10 @@ export default function MuestraTrigoModal({
       '5': 'Pastoso duro (Z.85/89)',
       '6': 'Próx. a mudurez (Z.90/99)',
     };
-    return estados[estadoFenologico] || 'Trigo';
+    return estados[estadoFenologico] || 'Maiz';
   };
 
+  // Renderizar los 23 inputs
   const renderDataInputs = () => {
     return DATOS_FIELDS.map((key, index) => {
       const labelText = LABELS[index];
@@ -178,10 +164,9 @@ export default function MuestraTrigoModal({
             keyboardType="numeric"
             returnKeyType={index === DATOS_COUNT - 1 ? 'done' : 'next'}
           />
-
-    {(index === 0 || index === 1 || index === 2 || (index > 2 && index % 2 === 0)) && index !== DATOS_COUNT - 1 && (
-      <View style={styles.separator} />
-    )}
+            {index !== DATOS_COUNT - 1 && (
+              <View style={styles.separator} />
+           )}
         </React.Fragment>
       );
     });
@@ -199,7 +184,7 @@ export default function MuestraTrigoModal({
       onRequestClose={handleCerrar}
     >
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.overlay}>
+      <View style={styles.overlay}>
           <View style={styles.modalContainer}>
             <View style={styles.header}>
               <Text style={styles.titulo}>
@@ -216,11 +201,8 @@ export default function MuestraTrigoModal({
               </TouchableOpacity>
             </View>
             
-            <ScrollView 
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {/* Coordenadas GPS */}
               <Text style={styles.label}>Coordenadas GPS:</Text>
               <View style={styles.gpsContainer}>
                 {loading ? (
@@ -255,7 +237,8 @@ export default function MuestraTrigoModal({
                   </>
                 )}
               </View>
-  
+
+              {/* Campos de datos dinámicos */}
               {renderDataInputs()}
               
               <View style={styles.botones}>
@@ -280,123 +263,122 @@ export default function MuestraTrigoModal({
               </View>
             </ScrollView>
           </View>
-        </View>
+      </View>
       </SafeAreaView>
     </Modal>
   );
 }
-  
-  const styles = StyleSheet.create({
-    safeArea: { 
-      flex: 1,
-    },
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 60,
-    },
-    separator: {
-      height: 1, 
-      backgroundColor: '#333', 
-      marginVertical: 12,
-    },
-    modalContainer: {
-      width: '100%',
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      padding: 24,
-      elevation: 5,
-      maxHeight: '85%',
-    },
-    scrollContent: {
-      flexGrow: 1,
-      paddingBottom: 20,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 20,
-    },
-    titulo: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      flex: 1,
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#333',
-      marginTop: 10,
-      marginBottom: 5,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 14,
-      fontSize: 16,
-    },
-    coordsInput: {
-      flex: 1,
-      marginBottom: 0,
-      backgroundColor: '#f8f9fa',
-      color: '#666',
-    },
-    coordsInputDisabled: {
-      backgroundColor: '#f0f0f0',
-      color: '#999',
-    },
-    gpsContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 14,
-    },
-    gpsButton: {
-      backgroundColor: '#007bff',
-      padding: 12,
-      borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: 10,
-      minWidth: 50,
-    },
-    loadingCoords: {
-      padding: 20,
-    },
-    botones: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 20,
-      gap: 10,
-    },
-    button: {
-      flex: 1,
-      padding: 15,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    cancelButton: {
-      backgroundColor: '#6c757d',
-    },
-    cancelButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    saveButton: {
-      backgroundColor: '#28a745',
-    },
-    saveButtonDisabled: {
-      backgroundColor: '#ccc',
-    },
-    saveButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-  });
+
+const styles = StyleSheet.create({
+  safeArea: { 
+    flex: 1,
+  },
+  separator: {
+    height: 1, 
+    backgroundColor: '#333', 
+    marginVertical: 12,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+  },
+  avoider: {
+    width: '100%',
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    elevation: 5,
+    maxHeight: '95%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 14,
+    fontSize: 16,
+  },
+  coordsInput: {
+    flex: 1,
+    marginBottom: 0,
+    backgroundColor: '#f8f9fa',
+    color: '#666',
+  },
+  coordsInputDisabled: {
+    backgroundColor: '#f0f0f0',
+    color: '#999',
+  },
+  gpsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  gpsButton: {
+    backgroundColor: '#007bff',
+    padding: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    minWidth: 50,
+  },
+  loadingCoords: {
+    padding: 20,
+  },
+  botones: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#6c757d',
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  saveButton: {
+    backgroundColor: '#28a745',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

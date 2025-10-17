@@ -194,6 +194,10 @@ export default function OperacionesScreen({ navigation }) {
     return { roney_op: '', cultivo: '' };
   }, [modoEdicion, operacionSeleccionada]);
 
+  const operacionesInvertidas = useMemo(() => {
+    return [...operaciones].reverse();
+  }, [operaciones]);
+
   return (
     <View style={styles.container}>
       <Image source={logo} style={styles.logo} />
@@ -205,7 +209,7 @@ export default function OperacionesScreen({ navigation }) {
       </TouchableOpacity>
       
       <FlatList
-        data={operaciones}
+        data={operacionesInvertidas}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         getItemLayout={getItemLayout}

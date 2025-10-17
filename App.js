@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Clipboard from 'expo-clipboard';
+import { StatusBar } from 'expo-status-bar';
 
 // Importa tu LicenseManager
 import LicenseManager from './src/utils/LicenseManager';
@@ -24,6 +25,12 @@ import { CrashHandler } from './src/utils/CrashHandler';
 import OperacionesScreen from './src/screens/OperacionesScreen';
 import MuestrasScreen from './src/screens/MuestrasScreen';
 import LotesScreen from './src/screens/LotesScreen';
+
+Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps.allowFontScaling = false;
+
+TextInput.defaultProps = TextInput.defaultProps || {};
+TextInput.defaultProps.allowFontScaling = false;
 
 const Stack = createStackNavigator();
 
@@ -40,15 +47,33 @@ const MainApp = React.memo(() => {
         <Stack.Screen 
           name="Muestras" 
           component={MuestrasScreen}
-          options={({ route }) => ({ 
-            title: route.params?.roney_op || 'Muestras'
+          options={({ route, navigation }) => ({ 
+            title: `Toma de muestras - ${route.params?.roney_op || 'Muestras'}`,
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Operaciones')}
+                style={{ marginRight: 15 }}
+                activeOpacity={0.6}
+              >
+                <Text style={{ fontSize: 24 }}>🏠</Text>
+              </TouchableOpacity>
+            )
           })}
         />
         <Stack.Screen 
           name="Lotes" 
           component={LotesScreen}
-          options={({ route }) => ({ 
-            title: `Lotes - ${route.params?.roney_op || 'Operación'}`
+          options={({ route, navigation }) => ({ 
+            title: `Lotes - ${route.params?.roney_op || 'Operación'}`,
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Operaciones')}
+                style={{ marginRight: 15 }}
+                activeOpacity={0.6}
+              >
+                <Text style={{ fontSize: 24 }}>🏠</Text>
+              </TouchableOpacity>
+            )
           })}
         />
       </Stack.Navigator>
@@ -64,6 +89,7 @@ export default function App() {
   const [deviceInfo, setDeviceInfo] = useState(null);
   const [licenseKey, setLicenseKey] = useState('');
   const [validating, setValidating] = useState(false);
+  const [licenseError, setLicenseError] = useState('');
 
   // ✅ Inicialización memoizada
   useEffect(() => {
@@ -75,6 +101,25 @@ export default function App() {
     
     checkActivation();
   }, []);
+
+  // ✅ Verificar periódicamente si la licencia expiró (cada 30 segundos)
+  useEffect(() => {
+    if (isActivated) {
+      const interval = setInterval(async () => {
+        const stillValid = await LicenseManager.isLicenseActivated();
+        if (!stillValid) {
+          setIsActivated(false);
+          Alert.alert(
+            '⚠️ Licencia Expirada',
+            'Tu licencia ha expirado. Por favor, ingresa una nueva clave.',
+            [{ text: 'OK' }]
+          );
+        }
+      }, 30000); // Verificar cada 30 segundos
+
+      return () => clearInterval(interval);
+    }
+  }, [isActivated]);
 
   // ✅ checkActivation memoizado
   const checkActivation = useCallback(async () => {
@@ -100,35 +145,45 @@ export default function App() {
     }
   }, [deviceInfo?.deviceId]);
 
-  // ✅ handleActivation memoizado
+  // ✅ handleActivation memoizado - ACTUALIZADO
   const handleActivation = useCallback(async () => {
     if (!licenseKey.trim()) {
-      Alert.alert('Error', 'Por favor ingresa la clave de licencia');
+      setLicenseError('Por favor ingresa la clave de licencia');
       return;
     }
 
     setValidating(true);
+    setLicenseError('');
 
     try {
-      // Validar la clave
-      const isValid = await LicenseManager.validateLicenseKey(licenseKey);
+      // Validar la clave - ahora retorna un objeto con más información
+      const result = await LicenseManager.validateLicenseKey(licenseKey);
       
-      if (isValid) {
-        // Guardar que fue validada
-        await LicenseManager.saveLicenseValidation();
+      if (result.valid) {
+        // Guardar la licencia validada con la clave
+        await LicenseManager.saveLicenseValidation(result.licenseKey);
+        
+        // Formatear la fecha de expiración
+        const expirationStr = result.expirationDate.toLocaleString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
         
         Alert.alert(
           '🎉 ¡Activación Exitosa!',
-          'Tu aplicación ha sido activada correctamente',
+          `Tu aplicación ha sido activada correctamente.\n\nExpira: ${expirationStr}`,
           [{ text: 'Continuar', onPress: () => setIsActivated(true) }]
         );
       } else {
-        Alert.alert(
-          '❌ Clave Inválida',
-          'La clave ingresada no es válida para este dispositivo. Verifica e intenta nuevamente.'
-        );
+        // Mostrar el error específico retornado por el validador
+        setLicenseError(result.error);
+        Alert.alert('❌ Error', result.error);
       }
     } catch (error) {
+      setLicenseError('Error al validar la licencia');
       Alert.alert('Error', 'Ocurrió un error durante la validación');
       console.error('Validation error:', error);
     } finally {
@@ -136,17 +191,40 @@ export default function App() {
     }
   }, [licenseKey]);
 
-  // ✅ handleDevReset memoizado (solo para desarrollo)
+  // ✅ handleDevReset memoizado - ACTUALIZADO para reset completo
   const handleDevReset = useCallback(async () => {
-    await LicenseManager.resetLicense();
+    await LicenseManager.fullReset(); // Usar fullReset para limpiar también licencias usadas
     setIsActivated(false);
     setLicenseKey('');
-    Alert.alert('Licencia reseteada (solo dev)');
+    setLicenseError('');
+    const info = await LicenseManager.getDeviceInfo();
+    setDeviceInfo(info);
+    Alert.alert('✓ Reset Completo', 'Licencia y registro de claves usadas reseteados');
+  }, []);
+
+  // ✅ handleDebugInfo - Mostrar información de debug
+  const handleDebugInfo = useCallback(async () => {
+    const debugInfo = await LicenseManager.getDebugInfo();
+    const message = `
+Device ID: ${debugInfo.deviceId}
+Modo: ${debugInfo.mode}
+Activada: ${debugInfo.activated ? 'Sí' : 'No'}
+Fecha activación: ${debugInfo.activationDate || 'N/A'}
+Fecha expiración: ${debugInfo.expirationDate || 'N/A'}
+Tiempo restante: ${debugInfo.timeLeft || 'N/A'}
+Licencias usadas: ${debugInfo.usedLicensesCount}
+    `.trim();
+    
+    Alert.alert('🔍 Debug Info', message, [
+      { text: 'Copiar', onPress: () => Clipboard.setString(message) },
+      { text: 'Cerrar' }
+    ]);
   }, []);
 
   // ✅ Componente de carga memoizado
   const LoadingView = useMemo(() => (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0066cc" />
         <Text style={styles.loadingText}>Verificando licencia...</Text>
@@ -230,15 +308,24 @@ export default function App() {
                 </Text>
                 
                 <TextInput
-                  style={styles.input}
-                  placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
+                  style={[
+                    styles.input,
+                    licenseError && styles.inputError
+                  ]}
+                  placeholder="XXXXX-XXXXX-XXXXX-XXXXXXXX"
                   value={licenseKey}
-                  onChangeText={setLicenseKey}
+                  onChangeText={(text) => {
+                    setLicenseKey(text);
+                    setLicenseError('');
+                  }}
                   autoCapitalize="characters"
                   autoCorrect={false}
-                  maxLength={23}
                   editable={!validating}
                 />
+
+                {licenseError ? (
+                  <Text style={styles.errorText}>{licenseError}</Text>
+                ) : null}
 
                 <TouchableOpacity 
                   style={[
@@ -261,20 +348,20 @@ export default function App() {
 
               {/* Footer */}
               <Text style={styles.footer}>
-                ℹ️ La activación es permanente y funciona sin conexión a internet
+                ℹ️ La licencia tiene una duración limitada y es de un solo uso
               </Text>
             </View>
           </ScrollView>
 
           {/* Botón de desarrollo para resetear (ELIMINAR EN PRODUCCIÓN) */}
-          {__DEV__ && (
+          {/* {__DEV__ && (
             <TouchableOpacity 
               style={styles.devResetButton}
               onPress={handleDevReset}
             >
               <Text style={styles.devResetText}>🔧 Reset License (DEV)</Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
@@ -414,10 +501,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 10,
     backgroundColor: '#fafafa',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     textAlign: 'center',
+  },
+  inputError: {
+    borderColor: '#ff5252',
+    borderWidth: 2,
+  },
+  errorText: {
+    color: '#ff5252',
+    fontSize: 14,
+    marginBottom: 15,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   activateButton: {
     backgroundColor: '#4caf50',

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import {formatDecimalDisplay} from '../utils/numberUtils';
 
 export default React.memo(function LoteItem({ lote, onPress, onDelete }) {
   
@@ -38,12 +39,12 @@ export default React.memo(function LoteItem({ lote, onPress, onDelete }) {
 
   // ✅ Texto de hectáreas memoizado
   const hectareasText = useMemo(() => {
-    return `${lote.hectareas} ha`;
+    return `${formatDecimalDisplay(lote.hectareas, 1)} ha`;
   }, [lote.hectareas]);
 
   // ✅ Texto de daño real memoizado
   const dañoRealText = useMemo(() => {
-    return `${lote.dañoReal}%`;
+    return `${formatDecimalDisplay(lote.dañoReal, 2)}%`;
   }, [lote.dañoReal]);
 
   // ✅ Eliminar memoizado

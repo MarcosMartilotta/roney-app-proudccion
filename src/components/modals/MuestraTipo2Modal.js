@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { convertirADMS } from '../../utils/coordenadas';
+
 
 export default function MuestraTipo2Modal({ 
   visible, 
@@ -107,11 +109,14 @@ export default function MuestraTipo2Modal({
         )
       ]);
 
-      const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      //const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      const latitudDMS = convertirADMS(location.coords.latitude, true);
+      const longitudDMS = convertirADMS(location.coords.longitude, false);
+      const coords = `${latitudDMS}, ${longitudDMS}`;
       
       if (isMountedRef.current) {
         setCoordenada(coords);
-        Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+        // Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
       }
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
@@ -207,270 +212,296 @@ export default function MuestraTipo2Modal({
       onRequestClose={handleCerrar}
     >
       <View style={styles.overlay}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-          style={styles.avoider}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.header}>
-              <Text style={styles.titulo}>{titulo}</Text>
-              <TouchableOpacity 
-                onPress={handleCerrar} 
-                accessibilityRole="button" 
-                accessibilityLabel="Cerrar"
+        <View style={styles.modalContainer}>
+          <View style={styles.header}>
+            <Text style={styles.titulo}>{titulo}</Text>
+            <TouchableOpacity 
+              onPress={handleCerrar} 
+              accessibilityRole="button" 
+              accessibilityLabel="Cerrar"
+            >
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView 
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.label}>Coordenadas GPS:</Text>
+            <View style={styles.gpsContainer}>
+              {loading ? (
+                <ActivityIndicator style={styles.loadingCoords} />
+              ) : (
+                <>
+                  <TextInput
+                    style={coordsInputStyle}
+                    placeholder="Coordenadas GPS"
+                    value={coordenada}
+                    onChangeText={setCoordenada}
+                    editable={!esEdicion}
+                  />
+                  
+                  {!esEdicion && (
+                    <TouchableOpacity
+                      style={styles.gpsButton}
+                      onPress={actualizarCoordenada}
+                      disabled={loadingGPS}
+                    >
+                      {loadingGPS ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Ionicons name="location" size={20} color="white" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </View>
+  
+            <Text style={styles.label}>Población perdida en D:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Pérdida en D"
+              value={dato_1}
+              onChangeText={setDato_1}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+          <View style={styles.separator} />  
+
+            
+            <Text style={styles.label}>Población restante en D:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Población restante en D:"
+              value={dato_2}
+              onChangeText={setDato_2}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+          <View style={styles.separator} />  
+
+            
+            <Text style={styles.label}>Nudos originales por Planta:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos originales por Planta"
+              value={dato_3}
+              onChangeText={setDato_3}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+          <View style={styles.separator} />  
+
+            
+            <Text style={styles.label}>Nudos remanentes 1:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos remanentes 1"
+              value={dato_4}
+              onChangeText={setDato_4}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+          <View style={styles.separator} />  
+
+            
+            <Text style={styles.label}>Nudos remanentes 2:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos remanentes 2"
+              value={dato_5}
+              onChangeText={setDato_5}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+          <View style={styles.separator} />  
+  
+            <Text style={styles.label}>Nudos remanentes 3:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos remanentes 3"
+              value={dato_6}
+              onChangeText={setDato_6}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+          <View style={styles.separator} />  
+
+  
+            <Text style={styles.label}>Nudos remanentes 4:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos remanentes 4"
+              value={dato_7}
+              onChangeText={setDato_7}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+            <View style={styles.separator} />  
+
+  
+            <Text style={styles.label}>Nudos remanentes 5:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nudos remanentes 5"
+              value={dato_8}
+              onChangeText={setDato_8}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+            <View style={styles.separator} />  
+  
+            <Text style={styles.label}>% Defoliación:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="% Defoliación"
+              value={dato_9}
+              onChangeText={setDato_9}
+              keyboardType="numeric"
+              returnKeyType="done"
+            />
+  
+            <View style={styles.botones}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={handleCerrar}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={saveButtonStyle}
+                onPress={handleGuardar}
+                disabled={!camposValidos}
+              >
+                <Text style={styles.saveButtonText}>Guardar</Text>
               </TouchableOpacity>
             </View>
-            
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <Text style={styles.label}>Coordenadas GPS:</Text>
-              <View style={styles.gpsContainer}>
-                {loading ? (
-                  <ActivityIndicator style={styles.loadingCoords} />
-                ) : (
-                  <>
-                    <TextInput
-                      style={coordsInputStyle}
-                      placeholder="Coordenadas GPS (lat, long)"
-                      value={coordenada}
-                      onChangeText={setCoordenada}
-                      editable={!esEdicion}
-                    />
-                    
-                    {!esEdicion && (
-                      <TouchableOpacity
-                        style={styles.gpsButton}
-                        onPress={actualizarCoordenada}
-                        disabled={loadingGPS}
-                      >
-                        {loadingGPS ? (
-                          <ActivityIndicator size="small" color="white" />
-                        ) : (
-                          <Ionicons name="location" size={20} color="white" />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
-              </View>
-
-              <Text style={styles.label}>Pérdida en D:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Pérdida en D"
-                value={dato_1}
-                onChangeText={setDato_1}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>Restante en D:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Restante en D"
-                value={dato_2}
-                onChangeText={setDato_2}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>Nudos originales por Planta:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos originales por Planta"
-                value={dato_3}
-                onChangeText={setDato_3}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>Nudos remanentes 1:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos remanentes 1"
-                value={dato_4}
-                onChangeText={setDato_4}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>Nudos remanentes 2:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos remanentes 2"
-                value={dato_5}
-                onChangeText={setDato_5}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-
-              <Text style={styles.label}>Nudos remanentes 3:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos remanentes 3"
-                value={dato_6}
-                onChangeText={setDato_6}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-
-              <Text style={styles.label}>Nudos remanentes 4:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos remanentes 4"
-                value={dato_7}
-                onChangeText={setDato_7}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-
-              <Text style={styles.label}>Nudos remanentes 5:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nudos remanentes 5"
-                value={dato_8}
-                onChangeText={setDato_8}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-
-              <Text style={styles.label}>% Defoliación:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="% Defoliación"
-                value={dato_9}
-                onChangeText={setDato_9}
-                keyboardType="numeric"
-                returnKeyType="done"
-              />
-
-              <View style={styles.botones}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
-                  onPress={handleCerrar}
-                >
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={saveButtonStyle}
-                  onPress={handleGuardar}
-                  disabled={!camposValidos}
-                >
-                  <Text style={styles.saveButtonText}>Guardar</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );
-}
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 40 : 0, 
-  },
-  avoider: {
-    width: '100%',
-  },
-  modalContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    elevation: 5,
-    maxHeight: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  coordsInput: {
-    flex: 1,
-    marginBottom: 0,
-    backgroundColor: '#f8f9fa',
-    color: '#666',
-  },
-  coordsInputDisabled: {
-    backgroundColor: '#f0f0f0',
-    color: '#999',
-  },
-  gpsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  gpsButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    minWidth: 50,
-  },
-  loadingCoords: {
-    padding: 20,
-  },
-  botones: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 10,
-  },
-  button: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#6c757d',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+  }
+  
+  const styles = StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 60,
+    },
+    separator: {
+      height: 1, 
+      backgroundColor: '#333', 
+      marginVertical: 12,
+    },
+    modalContainer: {
+      width: '100%',
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      padding: 24,
+      elevation: 5,
+      maxHeight: '85%',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 20,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    titulo: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      flex: 1,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#333',
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 16,
+    },
+    coordsInput: {
+      flex: 1,
+      marginBottom: 0,
+      backgroundColor: '#f8f9fa',
+      color: '#666',
+    },
+    coordsInputDisabled: {
+      backgroundColor: '#f0f0f0',
+      color: '#999',
+    },
+    gpsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    gpsButton: {
+      backgroundColor: '#007bff',
+      padding: 12,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 10,
+      minWidth: 50,
+    },
+    loadingCoords: {
+      padding: 20,
+    },
+    botones: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      gap: 10,
+    },
+    button: {
+      flex: 1,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: '#6c757d',
+    },
+    cancelButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    saveButton: {
+      backgroundColor: '#28a745',
+    },
+    saveButtonDisabled: {
+      backgroundColor: '#ccc',
+    },
+    saveButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });

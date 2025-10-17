@@ -6,11 +6,10 @@ import {
   TextInput, 
   StyleSheet, 
   TouchableOpacity, 
-  KeyboardAvoidingView, 
-  Platform, 
   ScrollView 
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { convertirADMS } from '../../utils/coordenadas';
 
 // ✅ Constante de mapeo de cultivos (fuera del componente)
 const CULTIVOS_MAP = {
@@ -105,192 +104,195 @@ export default function CrearOperacionModal({
       onRequestClose={handleCerrar}
     >
       <View style={styles.overlay}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.avoider}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.header}>
-              <Text style={styles.titulo}>{titulo}</Text>
+        <View style={styles.modalContainer}>
+          <View style={styles.header}>
+            <Text style={styles.titulo}>{titulo}</Text>
+            <TouchableOpacity 
+              onPress={handleCerrar} 
+              accessibilityRole="button" 
+              accessibilityLabel="Cerrar"
+            >
+              <Text style={styles.cerrar}>✕</Text>
+            </TouchableOpacity>
+          </View>
+  
+          <ScrollView 
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre de la operación"
+              value={roneyOp}
+              onChangeText={setRoneyOp}
+              autoFocus
+              returnKeyType="next"
+              editable
+            />
+            
+            {!modoEdicion ? (
+              <View style={styles.input}>
+                <Picker
+                  selectedValue={cultivo}
+                  onValueChange={setCultivo}
+                  style={styles.picker}
+                >
+                  <Picker.Item 
+                    label="Selecciona un cultivo..." 
+                    value="" 
+                    style={styles.pickerItem} 
+                  />
+                  <Picker.Item 
+                    label="Soja" 
+                    value="soja" 
+                    style={styles.pickerItem} 
+                  />
+                  <Picker.Item 
+                    label="Maíz" 
+                    value="maiz" 
+                    style={styles.pickerItem} 
+                  />
+                  <Picker.Item 
+                    label="Trigo" 
+                    value="trigo" 
+                    style={styles.pickerItem} 
+                  />
+                  <Picker.Item 
+                    label="Girasol" 
+                    value="girasol" 
+                    style={styles.pickerItem} 
+                  />
+                </Picker>
+              </View>
+            ) : (
+              <View style={inputDisabledStyle}>
+                <Text style={styles.cultivoTexto}>
+                  {cultivoDisplayText}
+                </Text>
+              </View>
+            )}
+  
+            <View style={styles.botones}>
               <TouchableOpacity 
-                onPress={handleCerrar} 
-                accessibilityRole="button" 
-                accessibilityLabel="Cerrar"
+                style={styles.cancelButton}
+                onPress={handleCerrar}
               >
-                <Text style={styles.cerrar}>✕</Text>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={saveButtonStyle}
+                onPress={handleGuardar}
+                disabled={!camposCompletos}
+              >
+                <Text style={styles.saveButtonText}>
+                  {textoBotonGuardar}
+                </Text>
               </TouchableOpacity>
             </View>
-
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <TextInput
-                style={styles.input}
-                placeholder="Nombre de la operación"
-                value={roneyOp}
-                onChangeText={setRoneyOp}
-                autoFocus
-                returnKeyType="next"
-                editable
-              />
-              
-              {!modoEdicion ? (
-                <View style={styles.input}>
-                  <Picker
-                    selectedValue={cultivo}
-                    onValueChange={setCultivo}
-                    style={styles.picker}
-                  >
-                    <Picker.Item 
-                      label="Selecciona un cultivo..." 
-                      value="" 
-                      style={styles.pickerItem} 
-                    />
-                    <Picker.Item 
-                      label="Soja" 
-                      value="soja" 
-                      style={styles.pickerItem} 
-                    />
-                    <Picker.Item 
-                      label="Maíz" 
-                      value="maiz" 
-                      style={styles.pickerItem} 
-                    />
-                    <Picker.Item 
-                      label="Trigo" 
-                      value="trigo" 
-                      style={styles.pickerItem} 
-                    />
-                    <Picker.Item 
-                      label="Girasol" 
-                      value="girasol" 
-                      style={styles.pickerItem} 
-                    />
-                  </Picker>
-                </View>
-              ) : (
-                <View style={inputDisabledStyle}>
-                  <Text style={styles.cultivoTexto}>
-                    {cultivoDisplayText}
-                  </Text>
-                </View>
-              )}
-
-              <View style={styles.botones}>
-                <TouchableOpacity 
-                  style={styles.cancelButton}
-                  onPress={handleCerrar}
-                >
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={saveButtonStyle}
-                  onPress={handleGuardar}
-                  disabled={!camposCompletos}
-                >
-                  <Text style={styles.saveButtonText}>
-                    {textoBotonGuardar}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );
-}
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    paddingHorizontal: 16,
-  },
-  avoider: {
-    width: '100%',
-  },
-  modalContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    elevation: 5,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  cerrar: {
-    fontSize: 22,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 14,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  inputDisabled: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#ddd',
-  },
-  picker: {
-    width: '100%',
-    color: '#000',
-  },
-  pickerItem: {
-    color: '#000',
-  },
-  cultivoTexto: {
-    fontSize: 16,
-    color: '#333',
-    padding: 2,
-  },
-  botones: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    gap: 10,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#6c757d',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  saveButtonActive: {
-    backgroundColor: '#28a745', 
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+  }
+  
+  const styles = StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.35)',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 100
+    },
+    modalContainer: {
+      width: '100%',
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      padding: 24,
+      elevation: 5,
+      maxHeight: '85%',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 20,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    titulo: {
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    cerrar: {
+      fontSize: 22,
+      color: '#333',
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 14,
+      fontSize: 16,
+      backgroundColor: '#fff',
+    },
+    inputDisabled: {
+      backgroundColor: '#f0f0f0',
+      borderColor: '#ddd',
+    },
+    picker: {
+      width: '100%',
+      color: '#000000',
+    },
+    pickerItem: {
+      color: '#000000',
+      backgroundColor: "#fff"
+    },
+    cultivoTexto: {
+      fontSize: 16,
+      color: '#333',
+      padding: 2,
+    },
+    botones: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 10,
+      gap: 10,
+    },
+    cancelButton: {
+      flex: 1,
+      backgroundColor: '#6c757d',
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    cancelButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    saveButton: {
+      flex: 1,
+      backgroundColor: '#007bff',
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    saveButtonDisabled: {
+      backgroundColor: '#ccc',
+    },
+    saveButtonActive: {
+      backgroundColor: '#28a745', 
+    },
+    saveButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });

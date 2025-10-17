@@ -6,14 +6,14 @@ import {
   TextInput, 
   StyleSheet, 
   TouchableOpacity, 
-  KeyboardAvoidingView, 
-  Platform, 
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  SafeAreaView
 } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { convertirADMS } from '../../utils/coordenadas';
 
 // --- CONFIGURACIÓN DE LOS 6 CAMPOS DE DATOS PARA GIRASOL ---
 const DATOS_COUNT = 5;
@@ -21,11 +21,11 @@ const DATOS_FIELDS = Array.from({ length: DATOS_COUNT }, (_, i) => `dato_${i + 1
 
 // Etiquetas específicas para trigo (ajusta según tus necesidades)
 const LABELS = [
-  'Pérdida en D',
-  'Improduct en D',
-  'Restante en D',
-  '% promedio daño capít.',
-  '% defoliacion'
+  'Población perdida en D',
+  'Población improductiva en D',
+  'Población restante en D',
+  '% Promedio daño capít.',
+  '% Defoliacion'
 ];
 // ------------------------------------------------
 
@@ -117,9 +117,14 @@ export default function MuestraGirasolModal({
         )
       ]);
 
-      const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      // const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+
+      const latitudDMS = convertirADMS(location.coords.latitude, true);
+      const longitudDMS = convertirADMS(location.coords.longitude, false);
+      const coords = `${latitudDMS}, ${longitudDMS}`;
+
       setCoordenada(coords);
-      Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+      //Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
       Alert.alert('Error', 'No se pudieron obtener las coordenadas GPS');
@@ -164,6 +169,7 @@ export default function MuestraGirasolModal({
             keyboardType="numeric"
             returnKeyType={index === DATOS_COUNT - 1 ? 'done' : 'next'}
           />
+          <View style={styles.separator} />  
         </React.Fragment>
       );
     });
@@ -180,11 +186,8 @@ export default function MuestraGirasolModal({
       statusBarTranslucent
       onRequestClose={handleCerrar}
     >
-      <View style={styles.overlay}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-          style={styles.avoider}
-        >
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.overlay}>
           <View style={styles.modalContainer}>
             <View style={styles.header}>
               <Text style={styles.titulo}>
@@ -201,7 +204,11 @@ export default function MuestraGirasolModal({
               </TouchableOpacity>
             </View>
             
-            <ScrollView keyboardShouldPersistTaps="handled">
+            <ScrollView 
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
               <Text style={styles.label}>Coordenadas GPS:</Text>
               <View style={styles.gpsContainer}>
                 {loading ? (
@@ -236,7 +243,7 @@ export default function MuestraGirasolModal({
                   </>
                 )}
               </View>
-
+  
               {renderDataInputs()}
               
               <View style={styles.botones}>
@@ -261,113 +268,123 @@ export default function MuestraGirasolModal({
               </View>
             </ScrollView>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </SafeAreaView>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  avoider: {
-    width: '100%',
-  },
-  modalContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    elevation: 5,
-    maxHeight: '95%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  coordsInput: {
-    flex: 1,
-    marginBottom: 0,
-    backgroundColor: '#f8f9fa',
-    color: '#666',
-  },
-  coordsInputDisabled: {
-    backgroundColor: '#f0f0f0',
-    color: '#999',
-  },
-  gpsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  gpsButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    minWidth: 50,
-  },
-  loadingCoords: {
-    padding: 20,
-  },
-  botones: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 10,
-  },
-  button: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#6c757d',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+  
+  const styles = StyleSheet.create({
+    safeArea: { 
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 60,
+    },
+    separator: {
+      height: 1, 
+      backgroundColor: '#333', 
+      marginVertical: 12,
+    },
+    modalContainer: {
+      width: '100%',
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      padding: 24,
+      elevation: 5,
+      maxHeight: '85%',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 20,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    titulo: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      flex: 1,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#333',
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 16,
+    },
+    coordsInput: {
+      flex: 1,
+      marginBottom: 0,
+      backgroundColor: '#f8f9fa',
+      color: '#666',
+    },
+    coordsInputDisabled: {
+      backgroundColor: '#f0f0f0',
+      color: '#999',
+    },
+    gpsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    gpsButton: {
+      backgroundColor: '#007bff',
+      padding: 12,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 10,
+      minWidth: 50,
+    },
+    loadingCoords: {
+      padding: 20,
+    },
+    botones: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      gap: 10,
+    },
+    button: {
+      flex: 1,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: '#6c757d',
+    },
+    cancelButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    saveButton: {
+      backgroundColor: '#28a745',
+    },
+    saveButtonDisabled: {
+      backgroundColor: '#ccc',
+    },
+    saveButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });

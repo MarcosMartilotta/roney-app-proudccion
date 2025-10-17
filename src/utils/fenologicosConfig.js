@@ -2,34 +2,60 @@
 
 export const ESTADOS_FENOLOGICOS = {
     soja: [
-      { label: "V1-V5", value: "1" },
-      { label: "V6-V8", value: "2" },
-      { label: "V9-VN", value: "3" },
-      { label: "R1-R2", value: "4" },
-      { label: "R2,5", value: "5" },
-      { label: "R3", value: "6" },
-      { label: "R3,5", value: "7" },
-      { label: "R4", value: "8" },
-      { label: "R4,5", value: "9" },
-      { label: "R5-R5,5", value: "10" },
-      { label: "R6", value: "11" },
-      { label: "R6,5", value: "12" },
-      { label: "R8", value: "13" }
+      { label: "V1", value: "1" },
+      { label: "V2", value: "2" },
+      { label: "V3", value: "3" },
+      { label: "V4", value: "4" },
+      { label: "V5", value: "5" },
+      { label: "V6", value: "6" },
+      { label: "V7", value: "7" },
+      { label: "V8", value: "8" },
+      { label: "V9-Vn", value: "9" },
+
+       { label: "R1", value: "10" },  
+      { label: "R2", value: "11" },  
+      { label: "R2,5", value: "12" }, 
+      { label: "R3", value: "13" },  
+      { label: "R3,5", value: "14" }, 
+      
+      { label: "R4", value: "15" },  
+      { label: "R4,5", value: "16" },
+      { label: "R5", value: "17" },  
+      { label: "R5,5", value: "18" },
+      { label: "R6", value: "19" },  
+      { label: "R6,5", value: "20" },
+      
+      { label: "R8", value: "21" }   
     ],
     
     maiz: [
-      { label: "V1-V4", value: "1" },
-      { label: "V5", value: "2" },
-      { label: "V6", value: "3" },
-      { label: "V7", value: "4" },
-      { label: "V8", value: "5" },//veerv9-r6 va de v4 a r6 y tiene muchas opciones
-      { label: "V13-VT", value: "6" },
-      { label: "R1", value: "7" },
-      { label: "R2", value: "8" },
-      { label: "R3", value: "9" },
-      { label: "R4", value: "10" },
-      { label: "R5", value: "11" },
-      { label: "R6", value: "12" }
+      { label: "V1", value: "1" },
+      { label: "V2", value: "2" },
+      { label: "V3", value: "3" },
+      { label: "V4", value: "4" },
+      { label: "V5", value: "5" },
+      { label: "V6", value: "6" },
+      { label: "V7", value: "7" },
+      { label: "V8", value: "8" },//veerv9-r6 va de v4 a r6 y tiene muchas opciones
+      
+      { label: "V9", value: "9" },
+      { label: "V10", value: "10" },
+      { label: "V11", value: "11" },
+      { label: "V12", value: "12" },
+      { label: "V13", value: "13" },
+      { label: "V14", value: "14" },
+      { label: "V15", value: "15" },
+      { label: "Inicio Florac.Fem (R1-)", value: "16" },
+      { label: "Flor Fem.Plena Barba Blanca (R1)", value: "17" },
+      { label: "Fin Flor Fem. Barba Marrón (R1+)", value: "18" },
+      { label: "Ampolla (R2)", value: "19" },
+      { label: "Lechoso Temprano (R3)", value: "20" },
+      { label: "Lechoso tardío (R3+)", value: "21" },
+      { label: "Pastoso Temprano (R4)", value: "22" },
+      { label: "Pastoso tardío (R4+)", value: "23" },
+      { label: "Identación/ Líneas Leche (R5)", value: "24" },
+      { label: "Madurez Fisiológica (R6)", value: "25" },
+      { label: "Madurez Comercial (R6+)", value: "26" }
     ],
     
     trigo: [
@@ -42,17 +68,28 @@ export const ESTADOS_FENOLOGICOS = {
     ],
     
     girasol: [
-      { label: "V1-V11", value: "1" },
-      { label: "V12-Vn", value: "2" },
-      { label: "R1 (estrella)", value: "3" },
-      { label: "R2 (botón a 0,5 - 2 cm)", value: "4" },
-      { label: "R3 (botón a + de 2 cm)", value: "5" },
-      { label: "R4 (apertura inflorescencia)", value: "6" },
-      { label: "R5 (inicio floración)", value: "7" },
-      { label: "R6 (fin floración)", value: "8" },
-      { label: "R7 (envés capítulo inicio amarilleo)", value: "9" },
-      { label: "R8 (envés capítulo amarillo)", value: "10" },
-      { label: "R9 (brácteas amarillo/marrón)", value: "11" },
+      { label: "V1", value: "1" },
+      { label: "V2", value: "2" },
+      { label: "V3", value: "3" },
+      { label: "V4", value: "4" },
+      { label: "V5", value: "5" },
+      { label: "V6", value: "6" },
+      { label: "V7", value: "7" },
+      { label: "V8", value: "8" },
+      { label: "V9", value: "9" },
+      { label: "V10", value: "10" },
+      { label: "V11", value: "11" },
+      { label: "V12-Vn", value: "12" },
+
+      { label: "R1 (estrella)", value: "13" },
+      { label: "R2 (botón a 0,5 - 2 cm)", value: "14" },
+      { label: "R3 (botón a + de 2 cm)", value: "15" },
+      { label: "R4 (apertura inflorescencia)", value: "16" },
+      { label: "R5 (inicio floración)", value: "17" },
+      { label: "R6 (fin floración)", value: "18" },
+      { label: "R7 (envés capítulo inicio amarilleo)", value: "19" },
+      { label: "R8 (envés capítulo amarillo)", value: "20" },
+      { label: "R9 (brácteas amarillo/marrón)", value: "21" },
     ]
   };
   
@@ -83,17 +120,16 @@ export const obtenerEstadosFenologicos = (cultivo) => {
    */
   export const MAPEO_TIPO_MODAL = {
     soja: [
-      { min: 1, max: 3, tipo: '1' },   // V1-V5, V6-V8, V9-VN
-      { min: 4, max: 7, tipo: '2' },   // R1-R2, R2,5, R3, R3,5
-      { min: 8, max: 12, tipo: '3' },  // R4, R4,5, R5-R5,5, R6, R6,5
-      { min: 13, max: 99, tipo: '4' }  // R8 en adelante
+      { min: 1, max: 9, tipo: '1' },   // V1-V5, V6-V8, V9-VN
+      { min: 10, max: 14, tipo: '2' },   // R1-R2, R2,5, R3, R3,5
+      { min: 15, max: 20, tipo: '3' },  // R4, R4,5, R5-R5,5, R6, R6,5
+      { min: 21, max: 99, tipo: '4' }  // R8 en adelante
     ],
     
     maiz: [
-      { min: 1, max: 3, tipo: '1' },   // VE, V1-V3, V4-V6
-      { min: 4, max: 6, tipo: '2' },   // V7-V9, V10-V12, V13-VT
-      { min: 7, max: 9, tipo: '3' },   // R1, R2, R3
-      { min: 10, max: 99, tipo: '4' }  // R4, R5, R6
+      { min: 1, max: 8, tipo: '1' },   // VE, V1-V3, V4-V6
+      { min: 9, max: 99, tipo: '2' },   // V7-V9, V10-V12, V13-VT
+   
     ],
     
     trigo: [
@@ -101,7 +137,7 @@ export const obtenerEstadosFenologicos = (cultivo) => {
     ],
     
     girasol: [
-      { min: 1, max: 11, tipo: '1' },   // V1-V11, 
+      { min: 1, max: 22, tipo: '1' },   // V1-V11, 
       // { min: 2, max: 2, tipo: '2' },   // V12-VN, 
       // { min: 3, max: 3, tipo: '3' },   // R1 (estrella), 
       // { min: 4, max: 4, tipo: '4' },   // R2 (botón a 0,5 - 2 cm), 

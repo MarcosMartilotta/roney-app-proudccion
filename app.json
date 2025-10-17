@@ -6,24 +6,36 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "jaEngine": "hermes",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.marcosmartilotta.dev.roneyproduccion"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#ffffff",
+        "userInterfaceStyle":"light",
+        "versionCode": 2 
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.marcosmartilotta.dev.roneyproduccion",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bfbd1ebe-8db0-48e1-96e1-f39d929ed7cb"
+      }
+    },
+    "plugins": [
+      "expo-location"
+    ]
   }
 }

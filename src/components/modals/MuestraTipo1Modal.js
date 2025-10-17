@@ -6,14 +6,15 @@ import {
   TextInput, 
   StyleSheet, 
   TouchableOpacity, 
-  KeyboardAvoidingView, 
-  Platform, 
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { convertirADMS } from '../../utils/coordenadas';
 
 export default function MuestraTipo1Modal({
   visible,
@@ -86,11 +87,15 @@ export default function MuestraTipo1Modal({
         )
       ]);
 
-      const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      const latitudDMS = convertirADMS(location.coords.latitude, true);
+      const longitudDMS = convertirADMS(location.coords.longitude, false);
+      const coords = `${latitudDMS}, ${longitudDMS}`;
+
+      //const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
       
       if (isMountedRef.current) {
         setCoordenada(coords);
-        Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+        //Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
       }
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
@@ -166,114 +171,121 @@ export default function MuestraTipo1Modal({
       statusBarTranslucent
       onRequestClose={handleCerrar}
     >
+   
       <View style={styles.overlay}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-          style={styles.avoider}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.header}>
-              <Text style={styles.titulo}>{titulo}</Text>
-              <TouchableOpacity 
-                onPress={handleCerrar} 
-                accessibilityRole="button" 
-                accessibilityLabel="Cerrar"
+        <View style={styles.modalContainer}>
+          <View style={styles.header}>
+            <Text style={styles.titulo}>{titulo}</Text>
+            <TouchableOpacity 
+              onPress={handleCerrar} 
+              accessibilityRole="button" 
+              accessibilityLabel="Cerrar"
+            >
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+  
+          <ScrollView 
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.label}>Coordenadas GPS:</Text>
+            <View style={styles.gpsContainer}>
+              {loading ? (
+                <ActivityIndicator style={styles.loadingCoords} />
+              ) : (
+                <>
+                  <TextInput
+                    style={coordsInputStyle}
+                    placeholder="Coordenadas GPS (lat, long)"
+                    value={coordenada}
+                    onChangeText={setCoordenada}
+                    editable={!esEdicion}
+                  />
+                  
+                  {!esEdicion && (
+                    <TouchableOpacity
+                      style={styles.gpsButton}
+                      onPress={actualizarCoordenada}
+                      disabled={loadingGPS}
+                    >
+                      {loadingGPS ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Ionicons name="location" size={20} color="white" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </View>
+  
+            <Text style={styles.label}>Población perdida en D:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Población perdida en D:"
+              value={dato_1}
+              onChangeText={setDato_1}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+
+            <View style={styles.separator} />  
+            
+            <Text style={styles.label}>Población restante en D:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese dato 2"
+              value={dato_2}
+              onChangeText={setDato_2}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+            
+            <View style={styles.separator} />  
+
+
+            <Text style={styles.label}>% Nudos Perdidos:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="% Nudos Perdidos:"
+              value={dato_3}
+              onChangeText={setDato_3}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+            
+            <View style={styles.separator} />  
+
+            <Text style={styles.label}>% Defoliación:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="% Defoliación:"
+              value={dato_4}
+              onChangeText={setDato_4}
+              keyboardType="numeric"
+              returnKeyType="done"
+            />
+
+            <View style={styles.botones}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={handleCerrar}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={saveButtonStyle}
+                onPress={handleGuardar}
+                disabled={!camposValidos}
+              >
+                <Text style={styles.saveButtonText}>Guardar</Text>
               </TouchableOpacity>
             </View>
-            
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <Text style={styles.label}>Coordenadas GPS:</Text>
-              <View style={styles.gpsContainer}>
-                {loading ? (
-                  <ActivityIndicator style={styles.loadingCoords} />
-                ) : (
-                  <>
-                    <TextInput
-                      style={coordsInputStyle}
-                      placeholder="Coordenadas GPS (lat, long)"
-                      value={coordenada}
-                      onChangeText={setCoordenada}
-                      editable={!esEdicion}
-                    />
-                    
-                    {!esEdicion && (
-                      <TouchableOpacity
-                        style={styles.gpsButton}
-                        onPress={actualizarCoordenada}
-                        disabled={loadingGPS}
-                      >
-                        {loadingGPS ? (
-                          <ActivityIndicator size="small" color="white" />
-                        ) : (
-                          <Ionicons name="location" size={20} color="white" />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
-              </View>
-
-              <Text style={styles.label}>Pérdida en D:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ingrese dato 1"
-                value={dato_1}
-                onChangeText={setDato_1}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>Restante en D:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ingrese dato 2"
-                value={dato_2}
-                onChangeText={setDato_2}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>% nudos perdidos:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ingrese dato 3"
-                value={dato_3}
-                onChangeText={setDato_3}
-                keyboardType="numeric"
-                returnKeyType="next"
-              />
-              
-              <Text style={styles.label}>% defoliación:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ingrese dato 4"
-                value={dato_4}
-                onChangeText={setDato_4}
-                keyboardType="numeric"
-                returnKeyType="done"
-              />
-              
-              <View style={styles.botones}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
-                  onPress={handleCerrar}
-                >
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={saveButtonStyle}
-                  onPress={handleGuardar}
-                  disabled={!camposValidos}
-                >
-                  <Text style={styles.saveButtonText}>Guardar</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );
@@ -283,12 +295,15 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 16,
+    paddingTop: 60,
   },
-  avoider: {
-    width: '100%',
+  separator: {
+    height: 1, 
+    backgroundColor: '#333', 
+    marginVertical: 12,
   },
   modalContainer: {
     width: '100%',
@@ -296,7 +311,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 24,
     elevation: 5,
-    maxHeight: '100%',
+    maxHeight: '85%', // ✅ Mantiene altura fija
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20, // ✅ Espacio extra al final
   },
   header: {
     flexDirection: 'row',

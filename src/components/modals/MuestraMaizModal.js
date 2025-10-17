@@ -6,44 +6,29 @@ import {
   TextInput, 
   StyleSheet, 
   TouchableOpacity, 
-  KeyboardAvoidingView, 
   Platform, 
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  SafeAreaView
 } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { convertirADMS } from '../../utils/coordenadas';
+
 
 // --- CONFIGURACIÓN DE LOS 23 CAMPOS DE DATOS PARA TRIGO ---
-const DATOS_COUNT = 23;
+const DATOS_COUNT = 6;
 const DATOS_FIELDS = Array.from({ length: DATOS_COUNT }, (_, i) => `dato_${i + 1}`);
 
 // Etiquetas específicas para trigo (ajusta según tus necesidades)
 const LABELS = [
-  'Pérdidas en D',  // dato_1
-  'Colgadas en D',  // dato_2
-  'Restantes en D', // dato_3
-  'Espiga 1 P',     // dato_4
-  'Espiga 1 T',     // dato_5
-  'Espiga 2 P',     // dato_6
-  'Espiga 2 T',     // dato_7
-  'Espiga 3 P',     // dato_8
-  'Espiga 3 T',     // dato_9
-  'Espiga 4 P',     // dato_10
-  'Espiga 4 T',     // dato_11
-  'Espiga 5 P',     // dato_12
-  'Espiga 5 T',     // dato_13
-  'Espiga 6 P',     // dato_14
-  'Espiga 6 T',     // dato_15
-  'Espiga 7 P',     // dato_16
-  'Espiga 7 T',     // dato_17
-  'Espiga 8 P',     // dato_18
-  'Espiga 8 T',     // dato_19
-  'Espiga 9 P',     // dato_20
-  'Espiga 9 T',     // dato_21
-  'Espiga 10 P',    // dato_22
-  'Espiga 10 T'   // dato_23
+  'Polación perdida en D',  // dato_1
+  'Polación restante en D', // dato_3
+  'Nº hileras promedio',
+  'Largo hilera promedio',
+  'Granos perdidos Totales',
+  '% Defoliación'
 ];
 // ------------------------------------------------
 
@@ -137,9 +122,13 @@ export default function MuestraMaizModal({
         )
       ]);
 
-      const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      // const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      const latitudDMS = convertirADMS(location.coords.latitude, true);
+      const longitudDMS = convertirADMS(location.coords.longitude, false);
+      const coords = `${latitudDMS}, ${longitudDMS}`;
+      
       setCoordenada(coords);
-      Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+      //Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
       Alert.alert('Error', 'No se pudieron obtener las coordenadas GPS');
@@ -160,7 +149,7 @@ export default function MuestraMaizModal({
       '5': 'Pastoso duro (Z.85/89)',
       '6': 'Próx. a mudurez (Z.90/99)',
     };
-    return estados[estadoFenologico] || 'Trigo';
+    return estados[estadoFenologico] || 'Maiz';
   };
 
   // Renderizar los 23 inputs
@@ -179,6 +168,9 @@ export default function MuestraMaizModal({
             keyboardType="numeric"
             returnKeyType={index === DATOS_COUNT - 1 ? 'done' : 'next'}
           />
+            {index !== DATOS_COUNT - 1 && (
+              <View style={styles.separator} />
+           )}
         </React.Fragment>
       );
     });
@@ -195,11 +187,8 @@ export default function MuestraMaizModal({
       statusBarTranslucent
       onRequestClose={handleCerrar}
     >
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.overlay}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-          style={styles.avoider}
-        >
           <View style={styles.modalContainer}>
             <View style={styles.header}>
               <Text style={styles.titulo}>
@@ -278,19 +267,28 @@ export default function MuestraMaizModal({
               </View>
             </ScrollView>
           </View>
-        </KeyboardAvoidingView>
       </View>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { 
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 16,
+    paddingTop: 60,
+  },
+  separator: {
+    height: 1, 
+    backgroundColor: '#333', 
+    marginVertical: 12,
   },
   avoider: {
     width: '100%',

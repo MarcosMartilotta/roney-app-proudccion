@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { convertirADMS } from '../../utils/coordenadas';
+
 
 // --- CONFIGURACIÓN DE LOS 21 CAMPOS DE DATOS ---
 const DATOS_COUNT = 21;
@@ -22,10 +24,10 @@ const DATOS_FIELDS = Array.from({ length: DATOS_COUNT }, (_, i) => `dato_${i + 1
 
 // ✅ Generar etiquetas una sola vez (constante)
 const LABELS = (() => {
-  const labels = ['En el suelo'];
+  const labels = ['Granos en el suelo'];
   for (let i = 1; i <= 10; i++) {
-    labels.push(`En vainas abiertas ${i}`);
-    labels.push(`En vainas sanas ${i}`);
+    labels.push(`Granos en vainas abiertas ${i}`);
+    labels.push(`Granos en vainas sanas ${i}`);
   }
   return labels;
 })();
@@ -110,11 +112,14 @@ export default function MuestraTipo4Modal({
         )
       ]);
 
-      const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      // const coords = `${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`;
+      const latitudDMS = convertirADMS(location.coords.latitude, true);
+      const longitudDMS = convertirADMS(location.coords.longitude, false);
+      const coords = `${latitudDMS}, ${longitudDMS}`;
       
       if (isMountedRef.current) {
         setCoordenada(coords);
-        Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
+        // Alert.alert('Éxito', 'Coordenadas GPS actualizadas');
       }
     } catch (error) {
       console.error('Error obteniendo coordenadas:', error);
@@ -168,6 +173,10 @@ export default function MuestraTipo4Modal({
             keyboardType="numeric"
             returnKeyType={index === DATOS_COUNT - 1 ? 'done' : 'next'}
           />
+   
+    {(index === 0 || (index > 0 && index % 2 === 0)) && index !== DATOS_COUNT - 1 && (
+      <View style={styles.separator} />
+    )}
         </React.Fragment>
       );
     });
@@ -202,186 +211,191 @@ export default function MuestraTipo4Modal({
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.overlay}>
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-            style={styles.avoider}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.header}>
-                <Text style={styles.titulo}>{titulo}</Text>
-                <TouchableOpacity 
-                  onPress={handleCerrar} 
-                  accessibilityRole="button" 
-                  accessibilityLabel="Cerrar"
+          <View style={styles.modalContainer}>
+            <View style={styles.header}>
+              <Text style={styles.titulo}>{titulo}</Text>
+              <TouchableOpacity 
+                onPress={handleCerrar} 
+                accessibilityRole="button" 
+                accessibilityLabel="Cerrar"
+              >
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView 
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.label}>Coordenadas GPS:</Text>
+              <View style={styles.gpsContainer}>
+                {loading ? (
+                  <ActivityIndicator style={styles.loadingCoords} />
+                ) : (
+                  <>
+                    <TextInput
+                      style={coordsInputStyle}
+                      placeholder="Coordenadas GPS"
+                      value={coordenada}
+                      onChangeText={setCoordenada}
+                      editable={!esEdicion}
+                    />
+                    
+                    {!esEdicion && (
+                      <TouchableOpacity
+                        style={styles.gpsButton}
+                        onPress={actualizarCoordenada}
+                        disabled={loadingGPS}
+                      >
+                        {loadingGPS ? (
+                          <ActivityIndicator size="small" color="white" />
+                        ) : (
+                          <Ionicons name="location" size={20} color="white" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </>
+                )}
+              </View>
+  
+              {renderDataInputs}
+              
+              <View style={styles.botones}>
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={handleCerrar}
                 >
-                  <Ionicons name="close" size={24} color="#333" />
+                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={saveButtonStyle}
+                  onPress={handleGuardar}
+                  disabled={!camposValidos}
+                >
+                  <Text style={styles.saveButtonText}>Guardar</Text>
                 </TouchableOpacity>
               </View>
-              
-              <ScrollView keyboardShouldPersistTaps="handled">
-                <Text style={styles.label}>Coordenadas GPS:</Text>
-                <View style={styles.gpsContainer}>
-                  {loading ? (
-                    <ActivityIndicator style={styles.loadingCoords} />
-                  ) : (
-                    <>
-                      <TextInput
-                        style={coordsInputStyle}
-                        placeholder="Coordenadas GPS (lat, long)"
-                        value={coordenada}
-                        onChangeText={setCoordenada}
-                        editable={!esEdicion}
-                      />
-                      
-                      {!esEdicion && (
-                        <TouchableOpacity
-                          style={styles.gpsButton}
-                          onPress={actualizarCoordenada}
-                          disabled={loadingGPS}
-                        >
-                          {loadingGPS ? (
-                            <ActivityIndicator size="small" color="white" />
-                          ) : (
-                            <Ionicons name="location" size={20} color="white" />
-                          )}
-                        </TouchableOpacity>
-                      )}
-                    </>
-                  )}
-                </View>
-
-                {renderDataInputs}
-                
-                <View style={styles.botones}>
-                  <TouchableOpacity
-                    style={[styles.button, styles.cancelButton]}
-                    onPress={handleCerrar}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancelar</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={saveButtonStyle}
-                    onPress={handleGuardar}
-                    disabled={!camposValidos}
-                  >
-                    <Text style={styles.saveButtonText}>Guardar</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </View>
-          </KeyboardAvoidingView>
+            </ScrollView>
+          </View>
         </View>
       </SafeAreaView>
     </Modal>
   );
-}
-
-const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 40 : 0, 
-  },
-  avoider: {
-    width: '100%',
-  },
-  modalContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    elevation: 5,
-    maxHeight: '95%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  coordsInput: {
-    flex: 1,
-    marginBottom: 0,
-    backgroundColor: '#f8f9fa',
-    color: '#666',
-  },
-  coordsInputDisabled: {
-    backgroundColor: '#f0f0f0',
-    color: '#999',
-  },
-  gpsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  gpsButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    minWidth: 50,
-  },
-  loadingCoords: {
-    padding: 20,
-  },
-  botones: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 10,
-  },
-  button: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#6c757d',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+  }
+  
+  const styles = StyleSheet.create({
+    safeArea: { 
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 60,
+    },
+    separator: {
+      height: 1, 
+      backgroundColor: '#333', 
+      marginVertical: 12,
+    },
+    modalContainer: {
+      width: '100%',
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      padding: 24,
+      elevation: 5,
+      maxHeight: '85%',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 20,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    titulo: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      flex: 1,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#333',
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 16,
+    },
+    coordsInput: {
+      flex: 1,
+      marginBottom: 0,
+      backgroundColor: '#f8f9fa',
+      color: '#666',
+    },
+    coordsInputDisabled: {
+      backgroundColor: '#f0f0f0',
+      color: '#999',
+    },
+    gpsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    gpsButton: {
+      backgroundColor: '#007bff',
+      padding: 12,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 10,
+      minWidth: 50,
+    },
+    loadingCoords: {
+      padding: 20,
+    },
+    botones: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      gap: 10,
+    },
+    button: {
+      flex: 1,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: '#6c757d',
+    },
+    cancelButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    saveButton: {
+      backgroundColor: '#28a745',
+    },
+    saveButtonDisabled: {
+      backgroundColor: '#ccc',
+    },
+    saveButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });

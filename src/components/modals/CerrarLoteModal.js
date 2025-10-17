@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
+import { parseDecimalInput, formatDecimalDisplay, validateDecimalInput } from '../../utils/numberUtils';
 
 export default function CerrarLoteModal({ 
   visible, 
@@ -44,13 +45,25 @@ export default function CerrarLoteModal({
   // ✅ Validación de campos memoizada
   const camposValidos = useMemo(() => {
     const nombreValido = nombreLote.trim().length > 0;
-    const hectareasNumero = parseFloat(hectareas);
-    const hectareasValidas = !isNaN(hectareasNumero) && hectareasNumero > 0;
+    const hectareasNumero = parseDecimalInput(hectareas);
+    const hectareasValidas = hectareasNumero > 0;
     
     return nombreValido && hectareasValidas;
   }, [nombreLote, hectareas]);
 
-  // ✅ Confirmación memoizada
+  // ✅ Manejar cambio de hectáreas con validación
+  const handleHectareasChange = useCallback((text) => {
+    const validated = validateDecimalInput(text);
+    setHectareas(validated);
+  }, []);
+
+  // ✅ Manejar cambio de daño pactado con validación
+  const handleDañoPactadoChange = useCallback((text) => {
+    const validated = validateDecimalInput(text);
+    setDañoPactado(validated);
+  }, []);
+
+  // ✅ Confirmación memoizada con parsing correcto
   const handleConfirmar = useCallback(() => {
     // Validaciones
     if (!nombreLote.trim()) {
@@ -63,8 +76,8 @@ export default function CerrarLoteModal({
       return;
     }
 
-    const hectareasNumero = parseFloat(hectareas);
-    if (isNaN(hectareasNumero) || hectareasNumero <= 0) {
+    const hectareasNumero = parseDecimalInput(hectareas);
+    if (hectareasNumero <= 0) {
       Alert.alert('Error', 'Las hectáreas deben ser un número mayor a 0');
       return;
     }
@@ -73,7 +86,7 @@ export default function CerrarLoteModal({
       nombreLote: nombreLote.trim(),
       hectareas: hectareasNumero,
       dañoReal: Math.round(dañoRealCalculado * 100) / 100,
-      dañoPactado: dañoPactado.trim() ? parseFloat(dañoPactado) : null,
+      dañoPactado: dañoPactado.trim() ? parseDecimalInput(dañoPactado) : null,
       muestrasIds: muestrasSeleccionadas.map(m => m.id),
       tipoFenologico: tipoFenologicoSeleccionado,
     };
@@ -117,9 +130,9 @@ export default function CerrarLoteModal({
       : 'Sin muestras para calcular';
   }, [muestrasSeleccionadas.length]);
 
-  // ✅ Daño formateado memoizado
+  // ✅ Daño formateado memoizado con coma
   const dañoFormateado = useMemo(() => {
-    return `${(Math.round(dañoRealCalculado * 100) / 100).toFixed(2)}%`;
+    return `${formatDecimalDisplay(dañoRealCalculado, 2)}%`;
   }, [dañoRealCalculado]);
 
   // ✅ Estilos dinámicos memoizados
@@ -179,12 +192,15 @@ export default function CerrarLoteModal({
                 <Text style={styles.label}>Hectáreas *</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ej: 25.5"
+                  placeholder="Ej: 25,5 o 25.5"
                   value={hectareas}
-                  onChangeText={setHectareas}
-                  keyboardType="numeric"
+                  onChangeText={handleHectareasChange}
+                  keyboardType="decimal-pad"
                   maxLength={10}
                 />
+                <Text style={styles.helpText}>
+                  💡 Puedes usar coma (,) o punto (.) como separador decimal
+                </Text>
               </View>
 
               <View style={styles.inputContainer}>
@@ -297,6 +313,12 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fafafa',
+  },
+  helpText: {
+    fontSize: 11,
+    color: '#666',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   calculatedContainer: {
     backgroundColor: '#e8f5e8',
